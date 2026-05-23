@@ -25,6 +25,17 @@ describe('describeValue', () => {
     expect(result).toContain('every 10 starting at 5');
   });
 
+  it('describes multiple ranges', () => {
+    const result = describeValue('hour', { ranges: [{ start: 1, end: 5 }, { start: 10, end: 12 }] });
+    expect(result).toContain('1-5');
+    expect(result).toContain('10-12');
+  });
+
+  it('describes multiple specific values', () => {
+    const result = describeValue('dayOfWeek', { values: [1, 3, 5] });
+    expect(result).toContain('specific values: 1, 3, 5');
+  });
+
   it('returns "unknown" for empty parsed field', () => {
     expect(describeValue('month', {})).toBe('unknown');
   });
@@ -61,6 +72,24 @@ describe('explain', () => {
     expect(minuteField.raw).toBe('*/15');
     expect(minuteField.description).toContain('every 15');
     expect(minuteField.range).toEqual({ min: 0, max: 59 });
+  });
+
+  it('each result entry has the expected shape', () => {
+    const parsed = {
+      minute: { raw: '*', all: true },
+      hour: { raw: '*', all: true },
+      dayOfMonth: { raw: '*', all: true },
+      month: { raw: '*', all: true },
+      dayOfWeek: { raw: '*', all: true },
+    };
+    const result = explain(parsed);
+    result.forEach(entry => {
+      expect(entry).toHaveProperty('field');
+      expect(entry).toHaveProperty('label');
+      expect(entry).toHaveProperty('raw');
+      expect(entry).toHaveProperty('description');
+      expect(entry).toHaveProperty('range');
+    });
   });
 
   it('handles missing field data gracefully', () => {
