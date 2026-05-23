@@ -23,6 +23,14 @@ describe('mergeField', () => {
     expect(mergeField(['1'], ['2'], 'intersection')).toEqual(['*']);
   });
 
+  test('intersection of two wildcards returns wildcard', () => {
+    expect(mergeField(['*'], ['*'], 'intersection')).toEqual(['*']);
+  });
+
+  test('union of two wildcards returns wildcard', () => {
+    expect(mergeField(['*'], ['*'], 'union')).toEqual(['*']);
+  });
+
   test('throws on unknown strategy', () => {
     expect(() => mergeField(['1'], ['2'], 'xor')).toThrow('Unknown merge strategy');
   });
@@ -47,5 +55,10 @@ describe('mergeCron', () => {
   test('defaults to union strategy', () => {
     const { expression } = mergeCron('0 6 * * *', '0 18 * * *');
     expect(expression).toBe('0 6,18 * * *');
+  });
+
+  test('merging identical expressions returns the same expression', () => {
+    const { expression } = mergeCron('0 9 * * 1', '0 9 * * 1', 'union');
+    expect(expression).toBe('0 9 * * 1');
   });
 });
