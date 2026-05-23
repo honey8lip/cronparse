@@ -37,6 +37,16 @@ describe('formatFieldValue', () => {
     expect(formatFieldValue('30', 'minute')).toBe('30');
     expect(formatFieldValue('9', 'hour')).toBe('9');
   });
+
+  test('throws on null or undefined value', () => {
+    expect(() => formatFieldValue(null, 'minute')).toThrow();
+    expect(() => formatFieldValue(undefined, 'hour')).toThrow();
+  });
+
+  test('throws on unrecognized field name', () => {
+    expect(() => formatFieldValue('*', 'second')).toThrow();
+    expect(() => formatFieldValue('5', 'year')).toThrow();
+  });
 });
 
 describe('toSummary', () => {
