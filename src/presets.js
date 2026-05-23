@@ -45,4 +45,18 @@ function getPreset(name) {
   return PRESETS.find((p) => p.name === lower || (p.alias && p.alias === lower)) || null;
 }
 
-module.exports = { PRESETS, resolvePreset, isPreset, getPreset };
+/**
+ * Return a list of all known preset names and their aliases (flattened).
+ * Useful for validation messages or help output.
+ * @returns {string[]} sorted list of all recognized preset strings
+ */
+function listPresetNames() {
+  const names = [];
+  for (const p of PRESETS) {
+    names.push(p.name);
+    if (p.alias) names.push(p.alias);
+  }
+  return names.sort();
+}
+
+module.exports = { PRESETS, resolvePreset, isPreset, getPreset, listPresetNames };
