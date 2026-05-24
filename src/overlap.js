@@ -64,3 +64,19 @@ export function overlapSummary(exprA, exprB) {
     conflicts
   };
 }
+
+/**
+ * Returns the fields that prevent two cron expressions from overlapping.
+ * Useful for debugging why two expressions never fire at the same time.
+ * @param {string} exprA
+ * @param {string} exprB
+ * @returns {string[]} list of field names with no overlapping values
+ */
+export function nonOverlappingFields(exprA, exprB) {
+  const a = parseCron(exprA);
+  const b = parseCron(exprB);
+  const overlaps = fieldOverlaps(a, b);
+  return Object.entries(overlaps)
+    .filter(([, vals]) => vals.length === 0)
+    .map(([field]) => field);
+}
