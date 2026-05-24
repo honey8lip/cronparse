@@ -49,4 +49,16 @@ function listEmitters() {
   return Array.from(registry.keys());
 }
 
-module.exports = { createEmitter, on, off, emit, listEvents, removeEmitter, clearAll, listEmitters };
+/**
+ * Remove all listeners for a specific event on an emitter.
+ * Returns the number of listeners that were removed, or -1 if the emitter doesn't exist.
+ */
+function clearEvent(id, event) {
+  const emitter = registry.get(id);
+  if (!emitter) return -1;
+  const count = emitter.listeners[event] ? emitter.listeners[event].length : 0;
+  delete emitter.listeners[event];
+  return count;
+}
+
+module.exports = { createEmitter, on, off, emit, listEvents, removeEmitter, clearAll, listEmitters, clearEvent };
