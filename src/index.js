@@ -1,50 +1,54 @@
-const { parseCron } = require('./parser');
-const { validate } = require('./validator');
-const { humanize } = require('./humanize');
-const { nextRun } = require('./nextRun');
+/**
+ * cronparse — main entry point
+ */
+
+export { parseCron, parseField, resolveAlias } from './parser.js';
+export { validate, validateParsed, validatePart } from './validator.js';
+export { humanize, describeField, formatValue } from './humanize.js';
+export { nextRun, matchesCron, matchesField } from './nextRun.js';
+export { toSummary, toExpression, formatFieldValue } from './formatter.js';
+export { resolvePreset, isPreset, getPreset, listPresetNames } from './presets.js';
+export { diffCron, diffFields } from './diff.js';
+export { explain, describeValue } from './explain.js';
+export { getSchedule, getScheduleInRange } from './schedule.js';
+export { formatSchedule, formatRunDate, toScheduleSummary } from './scheduleFormatter.js';
+export { mergeCron, mergeField } from './merge.js';
+export { normalize, fillDefaults, normalizeWhitespace, expandAlias } from './normalize.js';
+export { toSixField, toFiveField, toNamedFields, fromNamedFields } from './convert.js';
+export { stringify, stringifyField } from './stringify.js';
+export { compareCron, fieldsEqual, expandField } from './compare.js';
+export { suggestFromPartial, listSuggestions, searchSuggestions } from './suggest.js';
+export { listTimezones, isValidTimezone, toTimezone, nextRunInTimezone } from './timezone.js';
+export { auditCron, isWildcard, isEveryMinute, hasBothDomAndDow, isFrequent, hasAliases } from './audit.js';
+export { range, expandToken, rangesEqual, rangeIntersect } from './range.js';
+export { matchesToken, matchesFieldValue, matchingValues, fieldsMatch, isSubsetOf } from './matchers.js';
+export { fieldOverlaps, canOverlap, overlapSummary } from './overlap.js';
+export { getBounds, clamp, inBounds, allValues, fieldLabel } from './bounds.js';
+export { getLastRuns, getRunsBetween, summarizeHistory } from './cronHistory.js';
+export { formatRunEntry, formatHistoryList, toHistorySummary } from './historyFormatter.js';
+export { shiftCron, shiftField, shiftToken, addMinutes } from './cronMath.js';
 
 /**
- * Parse and validate a cron expression, returning a rich result object.
- * @param {string} expression - A cron expression string (5 fields)
- * @param {object} [options]
- * @param {Date}   [options.from] - Reference date for nextRun (default: now)
- * @param {number} [options.previewCount] - Number of upcoming runs to return (default: 1)
- * @returns {object} result
+ * All-in-one cronparse function.
+ * Returns a rich object with parsed fields, validation, human description, and next run.
  */
-function cronparse(expression, options = {}) {
-  const { from = new Date(), previewCount = 1 } = options;
-
-  const validation = validate(expression);
-  if (!validation.valid) {
-    return {
-      expression,
-      valid: false,
-      errors: validation.errors,
-      description: null,
-      nextRuns: [],
-    };
-  }
+export function cronparse(expression, options = {}) {
+  const { parseCron } = await import('./parser.js');
+  const { validate } = await import('./validator.js');
+  const { humanize } = await import('./humanize.js');
+  const { nextRun } = await import('./nextRun.js');
 
   const parsed = parseCron(expression);
+  const validation = validate(expression);
   const description = humanize(expression);
-
-  const nextRuns = [];
-  let cursor = new Date(from);
-  for (let i = 0; i < previewCount; i++) {
-    const run = nextRun(expression, cursor);
-    if (!run) break;
-    nextRuns.push(run);
-    cursor = new Date(run.getTime() + 60 * 1000);
-  }
+  const next = nextRun(expression, options.from ?? new Date());
 
   return {
     expression,
-    valid: true,
-    errors: [],
     parsed,
+    valid: validation.valid,
+    errors: validation.errors ?? [],
     description,
-    nextRuns,
+    nextRun: next,
   };
 }
-
-module.exports = { cronparse };
